@@ -1,0 +1,543 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Forma · Longevity Score</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@1,300;1,700&family=DM+Mono:wght@400&family=Work+Sans:wght@300;400;500&display=swap">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--forest:#0F1A12;--green:#24442D;--bone:#F6F1E9;--warm:#EDE8DF;--steel:#8A9E90;--amber:#C9A24B;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*:before,*:after{box-sizing:inherit}
+body{margin:0;background:var(--forest);color:var(--bone);font-family:'Work Sans',system-ui,sans-serif;font-weight:300;font-size:16px;line-height:1.7}
+.wrap{max-width:560px;margin:0 auto;padding:48px 24px 80px}
+.logo{width:150px;display:block}
+.mono{font-family:'DM Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:.22em;font-size:12px}
+h1,h2{font-family:'Cormorant',Georgia,serif;font-style:italic;margin:0}
+h1{font-weight:700;font-size:52px;line-height:1.05;margin:40px 0 16px}
+h2{font-weight:300;font-size:34px;line-height:1.15;margin:0 0 8px}
+p{margin:0 0 16px;color:rgba(246,241,233,.85)}
+.muted{color:var(--steel)}
+.amber{color:var(--amber)}
+hr{border:0;border-top:1px solid rgba(201,162,75,.3);margin:32px 0}
+.q{background:var(--green);padding:24px;margin:0 0 16px}
+.q label.t{display:block;font-family:'Cormorant',Georgia,serif;font-style:italic;font-weight:700;font-size:26px;line-height:1.2;margin-bottom:6px;color:var(--bone)}
+.q .hint{font-size:14px;color:var(--steel);margin-bottom:14px}
+input[type=number],input[type=text],input[type=email],select{width:100%;background:var(--forest);color:var(--bone);border:1px solid rgba(246,241,233,.2);padding:14px;font:400 16px 'Work Sans',sans-serif;border-radius:0}
+input:focus,select:focus{outline:2px solid var(--amber);outline-offset:1px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.seg{display:flex;flex-wrap:wrap;gap:8px}
+.seg button{flex:1 1 auto;min-height:48px}
+button,.btn{font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.2em;font-size:12px;background:transparent;color:var(--bone);border:1px solid rgba(246,241,233,.35);padding:14px 18px;cursor:pointer;min-height:48px;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+button.on{background:var(--bone);color:var(--forest);border-color:var(--bone)}
+.cta{background:var(--amber);color:var(--forest);border-color:var(--amber);width:100%;font-size:13px}
+.link{background:none;border:0;padding:0;min-height:0;color:var(--steel);text-decoration:underline;letter-spacing:.12em}
+.hidden{display:none!important}
+.score{font-family:'Cormorant',Georgia,serif;font-style:italic;font-weight:700;font-size:140px;line-height:1;margin:16px 0 0}
+table{width:100%;border-collapse:collapse;font-size:15px}
+td{padding:12px 0;border-bottom:1px solid rgba(246,241,233,.1);vertical-align:top}
+td.pts{text-align:right;font-family:'DM Mono',monospace;color:var(--amber);white-space:nowrap}
+#cardImg{width:100%;max-width:360px;display:block;margin:24px auto;border:1px solid rgba(246,241,233,.15)}
+.stack{display:grid;gap:12px}
+.src{font-size:13px;color:var(--steel)}
+.src li{margin-bottom:8px}
+.notice{border:1px solid rgba(201,162,75,.5);padding:16px;margin:16px 0;font-size:15px}
+.topbar{display:flex;justify-content:space-between;align-items:center}
+.bar{height:2px;background:rgba(246,241,233,.12);margin:20px 0 8px}
+#barFill{height:2px;background:var(--amber);width:0;transition:width .3s}
+.step{display:none;min-height:52vh;padding-top:24px}
+.step.on{display:block;animation:fade .35s ease}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.step .q{margin-top:16px}
+.nav{display:grid;grid-template-columns:1fr 2fr;gap:12px;margin-top:16px}
+.err{color:var(--amber);font-size:14px;min-height:1.4em;margin:8px 0 0}
+.photoPrev{width:100%;max-width:360px;display:block;margin:16px auto}
+.sheet{position:fixed;inset:0;background:rgba(15,26,18,.97);z-index:50;overflow:auto;padding:max(24px,env(safe-area-inset-top)) 20px 32px}
+.sheetIn{max-width:420px;margin:0 auto;display:grid;gap:14px}
+#sheetImg{width:100%;max-width:340px;margin:0 auto;display:block;-webkit-touch-callout:default;user-select:auto}
+/* host */
+.board{counter-reset:r}
+.board .e{display:grid;grid-template-columns:48px 1fr auto;gap:12px;align-items:baseline;padding:14px 0;border-bottom:1px solid rgba(246,241,233,.1)}
+.board .rk{font-family:'DM Mono',monospace;color:var(--steel)}
+.board .nm{font-family:'Cormorant',Georgia,serif;font-style:italic;font-weight:700;font-size:28px;line-height:1.1}
+.board .sc{font-family:'Cormorant',Georgia,serif;font-style:italic;font-weight:700;font-size:40px;color:var(--amber)}
+.board .e.first .nm,.board .e.first .sc{font-size:44px}
+.tag{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.18em;color:var(--steel);text-transform:uppercase}
+.qrs{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.qrbox{background:var(--bone);padding:16px;color:var(--forest);text-align:center}
+.qrbox img,.qrbox canvas{width:100%!important;height:auto!important;display:block}
+.hostwide{max-width:1100px}
+@media(min-width:900px){.hostgrid{display:grid;grid-template-columns:1.3fr 1fr;gap:48px}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+
+<!-- STEPPER -->
+<section id="s-quiz">
+<div class="topbar"><img class="logo" src="" data-logo="1" alt="forma" style="width:96px"><div class="mono muted" id="prog"></div></div>
+<div class="bar"><div id="barFill"></div></div>
+
+<div class="step" data-step="0">
+<h1>What's your longevity score?</h1>
+<p>Five markers, each linked in large population studies to how long and how well people live. Most live in your watch or phone already. One you can only get at the Forma table.</p>
+<p class="muted">Two minutes. Not a medical test.</p>
+<div class="q">
+<label class="t">About you</label>
+<div class="hint">Your age and sex set the reference values for fitness and strength.</div>
+<div class="row">
+<input type="number" id="age" inputmode="numeric" min="18" max="95" placeholder="Age" aria-label="Age">
+<select id="sex" aria-label="Sex"><option value="">Sex</option><option value="f">Female</option><option value="m">Male</option></select>
+</div>
+</div>
+</div>
+
+<div class="step" data-step="1">
+<div class="mono amber">01 · Cardiovascular</div>
+<div class="q">
+<label class="t" for="vo2">What's your VO₂ max?</label>
+<div class="hint">Apple Watch: Health app › Cardio Fitness. Garmin, Polar, Whoop, Oura and Fitbit show it too.</div>
+<input type="number" id="vo2" inputmode="decimal" placeholder="e.g. 44" aria-label="VO2 max">
+<div class="hint" style="margin:16px 0 8px">No watch? Choose the closest:</div>
+<div class="seg" data-for="vo2alt">
+<button type="button" data-v="1">Can't run 5 km</button>
+<button type="button" data-v="2">5 km, over 35 min</button>
+<button type="button" data-v="3">5 km, 25 to 35 min</button>
+<button type="button" data-v="4">5 km, under 25 min</button>
+</div>
+</div>
+</div>
+
+<div class="step" data-step="2">
+<div class="mono amber">02 · Strength</div>
+<div class="q">
+<label class="t" for="grip">Your grip strength</label>
+<div class="hint">Only at the Forma table. Two squeezes with your dominant hand, best one counts, in kg.</div>
+<input type="number" id="grip" inputmode="decimal" placeholder="kg" aria-label="Grip strength in kg">
+</div>
+<button class="link" type="button" onclick="next(true)">Not yet, I'll get it at the table</button>
+</div>
+
+<div class="step" data-step="3">
+<div class="mono amber">03 · Heart at rest</div>
+<div class="q">
+<label class="t" for="rhr">Your resting heart rate</label>
+<div class="hint">From your watch, or count your pulse for 30 seconds while seated and double it.</div>
+<input type="number" id="rhr" inputmode="numeric" placeholder="bpm, e.g. 58" aria-label="Resting heart rate">
+</div>
+</div>
+
+<div class="step" data-step="4">
+<div class="mono amber">04 · Recovery</div>
+<div class="q">
+<label class="t" for="sleep">How many hours do you sleep?</label>
+<div class="hint">Hours actually asleep, on a typical night.</div>
+<input type="number" id="sleep" inputmode="decimal" step="0.25" placeholder="e.g. 7.5" aria-label="Average sleep hours">
+</div>
+</div>
+
+<div class="step" data-step="5">
+<div class="mono amber">05 · Daily movement</div>
+<div class="q">
+<label class="t" for="steps">Your average daily steps</label>
+<div class="hint">iPhone: Health app › Steps. Android: Google Fit or Samsung Health. Use the weekly average.</div>
+<input type="number" id="steps" inputmode="numeric" placeholder="e.g. 8500" aria-label="Average daily steps">
+</div>
+</div>
+
+<div class="step" data-step="6">
+<div class="mono amber">Bonus · not scored</div>
+<div class="q">
+<label class="t" for="hrv">Your HRV</label>
+<div class="hint">Worth tracking over time, but every brand measures it differently, so it doesn't count toward the score.</div>
+<input type="number" id="hrv" inputmode="numeric" placeholder="ms, optional" aria-label="HRV in milliseconds">
+</div>
+</div>
+
+<div class="step" data-step="7">
+<div class="mono amber">Last one</div>
+<div class="q">
+<label class="t" for="name">Your name for the leaderboard</label>
+<div class="stack">
+<input type="text" id="name" placeholder="First name" aria-label="First name">
+<input type="text" id="ig" placeholder="Instagram handle" aria-label="Instagram handle">
+<input type="email" id="email" placeholder="Email, to get your results" aria-label="Email">
+<label style="display:flex;gap:10px;align-items:flex-start;font-size:14px;color:var(--steel);line-height:1.5"><input type="checkbox" id="consent" style="width:22px;height:22px;flex:none;margin-top:2px"> Forma can save my answers and email me my results and news about Edition 01. I can ask for my data to be deleted anytime at forma.longevity@gmail.com.</label>
+</div>
+</div>
+</div>
+
+<p class="err" id="quizErr"></p>
+<div class="nav">
+<button type="button" id="backBtn" onclick="back()">Back</button>
+<button type="button" class="cta" id="nextBtn" onclick="next()">Start</button>
+</div>
+</section>
+
+<!-- RESULT -->
+<section id="s-result" class="hidden">
+<img class="logo" src="" data-logo="1" alt="forma" style="width:110px">
+<div class="mono muted" style="margin-top:40px">Your longevity score</div>
+<div class="score" id="rScore">0</div>
+<div class="mono amber" id="rOf">/ 100</div>
+<h2 style="margin-top:20px" class="amber" id="rTier"></h2>
+<div id="gripNote" class="notice hidden">Your score is missing grip strength, worth 20 points. Come to the Forma table for your grip test, then enter it here to unlock your full score and card.
+<div class="row" style="margin-top:12px"><input type="number" id="gripLate" inputmode="decimal" placeholder="Grip kg" aria-label="Grip strength in kg"><button type="button" class="cta" onclick="addGrip()">Unlock</button></div></div>
+<hr>
+<table id="rTable"></table>
+<p class="src" style="margin-top:16px">Points are set against your age and sex where the research does. Watch VO₂ max is an estimate, not a lab test.</p>
+
+<div id="shareBlock">
+<hr>
+<h2>Share it. Win the prize.</h2>
+<p>Post your card to your Instagram story and tag <span class="amber">@forma.longevity</span>. The highest score among everyone who shares wins tonight's prize.</p>
+<div class="seg" style="margin:8px 0 4px">
+<button type="button" class="on" id="modeCard" onclick="setMode('card')">Stats</button>
+<button type="button" id="modePhoto" onclick="takePhoto()">Photo + stats</button>
+</div>
+<input type="file" id="photoIn" accept="image/*" class="hidden" onchange="gotPhoto(event)">
+<canvas id="card" width="1080" height="1920" class="hidden"></canvas>
+<img id="cardImg" alt="Your Forma longevity score card">
+<div class="stack">
+<div class="mono amber">Step 1</div>
+<a class="btn" id="followBtn" href="https://www.instagram.com/forma.longevity/" target="_blank" rel="noopener noreferrer" onclick="followed()">Follow @forma.longevity</a>
+<div class="mono amber" style="margin-top:8px">Step 2</div>
+<button class="cta" id="shareBtn" onclick="shareCard()" disabled style="opacity:.4">Share to my Instagram story</button>
+<p class="muted" style="font-size:14px;text-align:center;margin:0" id="shareHint">Follow first to unlock sharing. Then pick Instagram, then Story, and tag @forma.longevity.</p>
+</div>
+</div>
+<hr>
+<div class="mono muted" style="margin-bottom:12px">Improve every marker</div>
+<p>Forma is a longevity journey: baseline testing in Switzerland, seven days at Arcana Wellness Village in Koh Phangan, and a 90-day retest back home. What gets measured, gets improved.</p>
+<p class="amber">10% off when you reserve by 5 November.</p>
+<div class="stack"><a class="btn cta" href="https://formalongevity.ch" target="_blank" rel="noopener noreferrer">Discover Edition 01</a>
+<a class="btn" href="https://www.instagram.com/forma.longevity/" target="_blank" rel="noopener noreferrer">Follow @forma.longevity</a></div>
+<hr>
+<details><summary class="mono muted" style="cursor:pointer">See the research</summary>
+<ul class="src" style="padding-left:18px;margin-top:16px">
+<li>VO₂ max · Mandsager et al., JAMA Network Open 2018. 122,007 adults; higher fitness, lower mortality, with no upper limit observed.</li>
+<li>Grip strength · Leong et al., The Lancet 2015 (PURE). Almost 140,000 adults in 17 countries; each 5 kg lower grip linked to 16% higher all-cause mortality.</li>
+<li>Resting heart rate · Zhang et al., CMAJ 2016 meta-analysis. Risk rises from 60 bpm and more steeply above 80 bpm.</li>
+<li>Sleep · Cappuccio et al., Sleep 2010 meta-analysis. Both short and long sleep linked to higher mortality; the lowest risk sits around 7 to 8 hours.</li>
+<li>Steps · Paluch et al., Lancet Public Health 2022. Benefit levels off around 8,000 to 10,000 steps under 60, and 6,000 to 8,000 from 60.</li>
+</ul></details>
+<p style="margin-top:32px"><button class="link" onclick="restart()">Start again</button></p>
+</section>
+
+<div id="saveSheet" class="sheet hidden" role="dialog" aria-label="Save your card">
+<div class="sheetIn">
+<div class="mono amber">Save your card</div>
+<img id="sheetImg" alt="Your Forma longevity score card">
+<p id="sheetTip">Press and hold the card, then tap Save to Photos (iPhone) or Download image (Android). Then open Instagram and add it to your story.</p>
+<div class="stack">
+<button class="cta" type="button" onclick="openIg()">Open Instagram</button>
+<button class="link" type="button" onclick="closeSheet()">Close</button>
+</div>
+</div>
+</div>
+
+<!-- HOST -->
+<section id="s-host" class="hidden">
+<div class="hostgrid">
+<div>
+<img class="logo" src="" data-logo="1" alt="forma">
+<h1 style="font-size:64px">Leaderboard</h1>
+<div class="mono muted" id="hostCount"></div>
+<div class="board" id="board" style="margin-top:24px"></div>
+</div>
+<div>
+<div class="mono amber" style="margin:24px 0 12px">Add a score · Forma table</div><div class="notice">Central participant data is saved only when consent is given and the Google Sheet endpoint is connected.</div>
+<div class="stack">
+<input type="text" id="hName" placeholder="Name" aria-label="Name">
+<input type="text" id="hIg" placeholder="Instagram handle" aria-label="Instagram handle">
+<input type="email" id="hEmail" placeholder="Email" aria-label="Email">
+<div class="row"><input type="number" id="hScore" placeholder="Score" aria-label="Score"><input type="number" id="hGrip" placeholder="Grip kg" aria-label="Grip kg"></div>
+<label style="display:flex;gap:10px;align-items:center;font-size:15px"><input type="checkbox" id="hShared" style="width:22px;height:22px"> Follows, shared story and tagged</label>
+<button class="cta" onclick="addEntry()">Add to board</button>
+</div>
+<hr>
+<div class="mono muted" style="margin-bottom:12px">Entries</div>
+<table id="hTable"></table>
+<div class="stack" style="margin-top:16px">
+<button onclick="exportCsv()">Export CSV for follow-up</button>
+<button class="link" onclick="clearAll()">Clear all entries</button>
+</div>
+<hr>
+<input type="hidden" id="qQuiz"><input type="hidden" id="qWeb">
+</div>
+</div>
+</section>
+</div>
+
+<script>
+var LOGO="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAcwAAACwCAMAAAC1kq66AAAAP1BMVEUAAAD18un5+fZscm2qrKmfqZqrs6WYo5RccV5tnm4oWizDyLt2h3a8wrXW183n6K0AAAAAAAAAAAAAAAAAAAAmGCmsAAAAEHRSTlMA/QUNCZ7aaFgTGOdk5KIKE/xvaAAAFFFJREFUeNrtXemCs6gSJRSgoibv/7bjmijUwSI6d2Jf6s/M1502QG2nFkqlChUqVKhQoUKFChUqVKhQobsQKT3T8H+F7sxIeuntv005kpuSXlhHZlJM00z/asrB3I8mppnOPtvHSu3DNpPdLXQv+zpYV7L9I6aqGNu7WVilavcAVCtdTuhG+FURZOVAtujmnXhZPZJUlUO6jYn1gVq6bvhxt+dm0c17UM3r4Y7DVDDtDWjQuICXNAScNPy83bvNAoJuyEszWVQTulEq3Px97BPa2LcjLYj2drykgGduVkCjbPCLZ9HMH+el3jvGyZpOehn/4lGY+esO0/LGlFQTxZolR/vT9NrHkiP5mWNNBIvevyr0m8kC7VHeLsa4j7Zo5r2M7Ds1QLHOFgD027ysYUKdlIl/V+iXmeniWlfzDjPDX3ZFM3/YY8aVkv7DLx+qbckZ/HS6wMdlS22gQy3g56cV0x5FkpsPtKVo8suKqSnipQuj0LcdViXG/G2KFbMiEyjvQM/n01Jp6fptjxkrZpyve3NQF728V75grZfsdJOmZujCyt9GP55p2qISSP4VxXzU5VxuqZhaMe2UJcNzU8XsHhKXWegWLtNxfc6FmTekhotLHlRiyXsqpi0u8+8ws9wN+isUt8qWyyR/zMqWsshNmdnGvGzH4LPQ3cizVra4zD9kZeuvrCwN9PnPSVdOzA/ynktwlcOuBY+i+Svp3DZI5a77DLlLXKZudPDvbzegdWNCG/9uYHnJnqrJ8G5Cb35u0tF3/OXZR7KJ78B65oFZF/GaFBeYuMyS5VpgIfMalvYy5OcN5C6SPmzcVcbHH9LwaLP8v+wRvuF1dZprZLzCM40WwNC8P/gFOxfhbkZ2mZ3s0LjI6aQuD0y48QVZq5852ex0vO/nk5PJBNFOF01tn26THDbjFJv52c6CzFTwCBprPn0ds5LU060Yr0KSMf50WMMyOKd9Viq7fX9aZLd5hvXg2/wgW80Z1Rz2Pan36zWcNucytdFveiUVzMw75yYGucpjRSJPZJZv+bCgq5Trg0jX7HtaPhGwnyR8/whFm0dEMtc5waCN4fE+3E/m8KPxUOowSrCrRPh62Gc1PPLp3LLUryNBczRL5BFfRXglVk02MWQG9QvteVwPW3Ou5S4mDTyoJWaDecTuqv7wN13PoPbQ1o08ZzbUZzqdquec17Agw1yoO5E81aybfHwx92eWpqO/BX9cj8dfraKJegO5MTbvgs4o4MrCR1Qbn6iBzNlYJTr2Ya1YN4cvrVqwJzMITyVaxSn8mh77Y4A9ouNHtcxAL3MsT5U3My8th7X9IOLt0SO83gCaDnyo2+2N/755H7L+0uEz3uGDHFbSc4v4nynmw3Db8KNrCZ3kCDkqG4+e8dlrmI+FFzw74mRzbE/0x+5BV9BvQZpJSaeS2EKDpWEZ60Fsvu1LzeQT6ynqOSwX27++eSPB2NT6TGbOWBYwoR8PzRzbk+bjDVIfe32WlXxop5uTvBxPovpSTC7DP5rR79CYTNZsSpm8omY/F4jDMTMntYJLrSXM9IsE6fQB200IZA4E7NjqMcbf2Zpq266LcpyVPRGanMc/EcQcTPE2tdJF59DkMXMMJxtoQySauTJJ6wOMsC6cWJyZkxdjt2V3p94pVuy+Tx9sYkjNyWyr90SMibUJXo676pMYavqstZijrTIplGQnR9gpq9qE+dQLL63AO0t4eVDkZT3zmLgYA9dhLdNSOfm8rHfu+YU5YXgZbJNiIanZg6AKqhUZ1QuwSOXSanRsBGo1J+zo0EQlfRsLhPtNwFLPNpeTkRNWllaVM9rzdiegCMa6g10yd1faPTMHXo3JG2Tzp93Z9Knq8Qkw0FqWdKiXS7c3GUHAlmImi7K2WGFZSQs2e0H5yzyy618UHx83FTEBNHbZaF41x9ijFnlxpFHzMW5MtbMuoZkbx+qsbbOZSZxQ7XCfIfUtrhIys+KDbZ8qZser5kKXVggfKp5ZjUm4w4cAz03f1ryR2JhXBEo6i4TdpWtdJjOJRVn1FvZB6bzoUg97x2Q7ykAmgSyydiLVBB6tAUvjHfADbeJj7bsErB0++R5aZdcCWJ/FTM3uYw8kPGJmfZVmsmrhdRYvrTRlKE4ttpvEQ8//Xh8wc8x2vtXFzbU4HrtPv6OoOJKDZjWISYwoJLwGy/KF6WQxkxNuvsLYpxPfCXM8H8P8PW2n6jZ5TMB6jVZ2BT9u2ZFWmnVZzbqrevUXICrqQDWbRVltwCQPmHnRGGajXpn4h1s1WIzIShGPXpq1dPH0THJwDSZSX+WmYpPd1xF5ZFu9nemnIgAwcJ3jrWphGrW6ysraPLVnV80VEzTLpDbiZsNyYvB3flt2qlP2i9/E8JE1f/RuAuEvSI2SU4djqjSPvtCpdJK0GYHCzUXDPvjNpfIRtdBKgJgnwrM8/rGrqszNKCHmbv0mJwWwCr3np9gti8BhxtfeWIPhAMgnViCNLCd+UfqHAP5BT+fzXcS1JQHkFnVQscW9wUDVu8zIa38MO5HgF+Xe0GpzVgQ6hOcPbrf9QgGTlgYlTMJLK/UvukxgxA3CPybrGidKqQbWuGULXG6ty8fRqNuX03hDPTYfVWG1kkc11fzBdttKCPwPC2YNMPNCO3jVqDODwGyT4eaJLauCKDGupbHexjB8qOcHtlV0RFx2uV6rOlst1tqx240gOYBlLDLkHebDx8fCf/3joqsD2rsM/GOQkcroZgiZ2bA872b00e1hzpRRbsJWMEI3ZVScgtFAdqNwDCTGuJPhJpsBhIqc2kXMBDFezqdBhQ+YFCcq2sxH6SKuqV0n8apEhk17zFIStOexVxeZLwOrt6SFG205tiOndpHL9DlWFkUAQDERM2mftOi5Z05SQybkmzFG2DbRrVHJ1tjx+rZY421DCNA2LucBEGqlpSttL5p2Bqw927yVCZZQL03YPcJ+jGwGyNMgO9FyPo4RMOdiq4iaVeL6g+ZLiI6P1vgo7HWRlVXS5i2AZBPFm1pY7OE4kQBWMtRsVyO7lzTu4BfY/BL4CFa8LJ/1M9IsdKeuIids3oLCavNwMuNLmGfaDFzAdwKZjk2tVLi1R5BiZIIwvjkdVp0SLSsXkBxd8cE9bHBCrRp7SeGTFl0U9WXX8FY0LOzuDFROg3p5vFmgwpU8qFcXdf+AJA3fqsO7V5iJ4oO/kJmsWvUuB7AbrNvB4rSCxW5l/FdW1gBnwq60YQ2DvUgxgeVseOfd5uT7B5zcAh14HeX53ayYsuI7sQBEcVKJu1DCXjRoZY1UMbU4WLtqDIiWN+ahIBqBFM2X1kKFY/eXpZjswlbdFlWIIvSTaC6hUNc6kFog1vG0/1r3DwoFnxmKmcj3d6h1p9lloGQtPtk1PF7QWkkHCuz/4bybk4NCkLG4aKSv5pEYpxNEoKrqof6AM2720l1BRHKq7YXbB+xwtsdNorsKzmF5koCV5evXzSXMJIR/GrH8Q4OP8M8+d8V35OR4Eo+7McNHvJB8hRpsoJXVIo8J8CkbDrSXBZmgy4BNyAuDxnRr0XJz+Og0Mip8JqHbJvyo8IOQR0Ioy7cJ8YbBXjU4/QXwjxYfmUXDMuAdkR0vIcsftW6kVtYJFRPePQg/iK1sIyrytbxm8oFJdZmVZQGBYltb7SOriA1hSSVSqz4jkH4IdRsZTxufuhVBMsR0m7PUq+4LgYvH/EXBhwyrHyrMrqlOkxXFfdluf9Q3it7I0sowr1bnpKMBVpb+ve6fRMus+MjwBBKIMYPPgTteXrpFTUqomFiPtCjbGgsY8MFwJglrZf1FzORNocvIs8LAHmH2vSSi881qcEIWQBtZ1qNpSKZwsgQ/hDSob42uYqb0IJHRNDgxW4nsZ4UgiTllXDjzJU+3+nNWtgZ5WcqJBvKtLAndlUYa9I3LbI4/5cTVWshMJr73Mg1GCsdgWRCtZZhBexUzDbqY2YhRBlwKytK5fZAJOSEvvT9R/OtFwVXPpM6tyI2jSAdZWZ8VDeQzU3oxAQWNCqcM0DXE4+4qvkcRJpd7YXQAyxtGBt1snP2x0i4hLEuXZX8MvG0jxT+w7wvq3C4+19LALz8w4ZKBvNxI6yCV1JPwt5Q1GEx11YBSraSVOJRnNRiKOREsccCv0jnjwkpkJYPjKFvsSRaN8oEjaXBV4zIrWwvxD6FTJyxYglITCkz6HHl8ytQI38+L5aYXcR0ZBf6WMvh6ui4w0UJ/hZoGHLZ+nSBJR6cvnmaJA7eFeK6hh20gRoYjWEgDFtpeZ2W9ZXM6RpjuT3hvtNFoqBPIhhmxcemEThfoUSw3L3grgYSgl1M24A7sRUl2fDHBSHO4DwUiCIQx91OAdG5Vjav6WLHTtdI0tLh1wB23qx1YkMsaZvk+qMeLYSYwyImrYqjMR7unguBcPoJeZyRHnahWpeHdr0YGC6z8xt9o5C8yswCCK7bLQB8XQI7VwO33aXJ7F8TWPC6yiq0sMNy9GOMptuWGTtf5vjmJp/yGxOOhwZsAgJWtwwmlz9NYVt6pbGVmTh92hX+yf+LanaSQehLVkpM25CKckdfIYWV+pKKXnJm9UOBBa6FneOnSDoKWF7WgyIQBswYPctq7nTPEr9pwh2ayIhNWENsg/kKwUZ4xAF5/EAcjg+NOOsXm41sHxnRqP8PtEIrD6YqBOfse2YIgj3VYwGe6rOAvFBOQDcvAsgZaWS+zspXUC795OcmPTVXvuAOsjooOY3nMnnKZVYayvTKYacCFChOGFXkdYuKsSit+T4PXwozSJnduF8cI729GWQitjsZjzveN29p/H2XKxmclrBQw80ZJEksoSdTJrY20vIFsBZtFPbjo1q07FzPTwAmzXSiVJ5J7Thw58jfVATP5l4dQ3Jpq8yqkDGiuhV4LoN4YeALfs5ogWnoQ5jFuMjO7AiWH+f6eCGfMpfiHUCu2EoNZdg63uBXB5bhMJRQHNHwnykKjouNSbl6fM/4hAkAmHG2+8N/CQ3njYn/te00cTDBYaTskG8ZwqXN/tscA9vQYGertOd9qk6a/++wbTzQ03CIZuXO09wH11+Uw8UipRKTEMlMzBRbHHZscDGbZFuZuKYp74/YOvsN/CUfXU593g1qKXFBLWOb/wXmD7/LiCTTLG84E+mi/T3b0TCEBzdKUW1nwvhNmDAusJTYySNWup97urfNhJoA+s24tTvy51U7473npJBmR5HmwZWwv1bb2ZE0IJt5e0iyqFq1+UUW/hv4feUPNFMseNq9tJE7jx+P7vAXlREKPz+m4vCowa2YtY/dI3LtDOUktkHjzsmQkW97gQzAyY7Ro99YQXqaZqnuvMVxeE6Y1u9ZqevO1Pd/Y1YDROTpHNWXQvuFzSijeP9lk0MYSDu6zKM6RGxC46jWN0/p1Agq+SujmLmj/eRWDbgBAWdl9qrFLg+GD0Mg1zPQx7n2wwrYBiESbcwiOd7ptKt7YPVMDAXmr1ibywDe2H71Vzm2tNPtc+34t5bnbQ1qY3kpCQncsIi0BXhJAojmOQxiYoFKmYRoX+LrtMocmqFYKXmO0nKpBz/3UIE60j3xzu4zJ/VNYoAx35+Do8e60leX1jaQNI1VGRwUvAYaMhJfNaALSz6VTDZc8/qmSzGQEwB7AS1hzfaHixEtuZRtx7t+J2vJSmvmx4VqQggoildT9cNzPdzZlUGcnjTapXIp5aREvCbYiiK3NS+oyCQ2K19yxJHXNBSEsmmIaBZNpZp5thGYzHYeVxIZ78/BrQHc0vWnPxgVdn5NLzJq7AW5g1dKGEcWnIlPc4XyGlfAyNXdh9+6NCwvTx/DYcNxcZLzuo9/oTLXKwOcE38onbC1BFZ+UXka8pMPX5aqjMGbg5clZs7w5EfUeR5nX6dXvdfgyUkepLgjDp0AzXrpspK+pyCllqtSL5BT//nR6iAwooQJ1dbpBjzc9ksv13Itb42W2XbI/qQFH4M/ugIGoaOQ2mCpPeCwR+xdN4q3GLW3fpsJPBKXzM6BZ6yCbOzjsqDt4+WtfqbRPN6gELLeyGjWtkrRuC6Y3ah4kN2iKumFfyrKo8tH7rdQVU4PZozDiP06y03YCG2kPGm2+DExaxsqC92omnhwxp63Sksm+frRT4ahbe9xP9gXx/RZivRi53ln2jZbPipQkWNQMqawKEPcENo3CfjChEMNvqnbH98OITdWhcLtOMdfwuwghXnCfj/UjObXR6dA6+9zsoR/iisYrddFLHf5jaqx6jrS4nubQVjW2XSWgf9oG+Rn7Sd76i+7Zaq6XPa8zrHn3BI+C/lorCeIUI6su6qxqXvRVJgRFAiAxFjxfw5MNMY/YfMxUys4t8fqq8c+n0Mc7I7j/i2EfWv0N0mMWZGK6dE/b8TPa6ONPmcvG/9TCQvPhk4hWH0Tq/52Wszg6CTPQha6IdZmq0E2NiD2TSSv0W+ROVoUL/YxtZ+JoV47lrsyMXWZHphzMj7NtBNhcxMuU3Qv9Niv1LqZNucyqwJ/fprFbwY4ZqVoFtx/i+lMxsr/uGd89uG7X/MVEmUUxf10vG9CpxZRihK+pLPRf5QUIdIQwjXGVKlb2t42sAxMF4vEErSpW9reNbIV6QuI70F05rx8PSvq4T4IWl9mWrOy9FJOYDh+arSwd3x8u9FPM1KjEFfVS2YJ+7sfMRTPDd5v1xcjej5nLpScTzvCvi2L+PDMV6HAOMwZVOazfjzKJv0cSXvwpDvMWqhkpJs2K6VL3DQv9Jtkw/lBTr6tND2AsdAM7a9Xc+Wu/vXRV6HdU87mw+GBgTqHfpNA7Wh3c9HGFlzcytOjN3AezIwr9JDc9vkQ53lIrmZ976Sa4nz9eHnyVA7obN8nGV7TVWL8shZIboiDlu01mvX3Od9SLt7ylck6OkaZboNrM6qhLBu+27Nxd6iz3KP+Afh5OZShUqFChQoUKFSpUqFChQoUK/WX6B20vlNtPeIxBAAAAAElFTkSuQmCC";document.querySelectorAll("img[data-logo]").forEach(function(i){i.src=LOGO});
+var $=function(i){return document.getElementById(i)};
+var SHEET_URL=''; // Paste your Google Apps Script Web App URL here after deployment.
+var RID=(Date.now().toString(36)+Math.random().toString(36).slice(2,7));
+function saveRow(extra){
+ if(!$('consent').checked)return;
+ if(!SHEET_URL||SHEET_URL.indexOf('http')!==0||!last)return;
+ var fol=false;try{fol=!!localStorage.getItem('forma_followed')}catch(e){}
+ var r={id:RID,name:$('name').value.trim(),ig:$('ig').value.trim(),email:$('consent').checked?$('email').value.trim():'',consent:$('consent').checked,
+  age:state.age,sex:state.sex,vo2:num('vo2'),vo2alt:state.vo2alt,grip:num('grip'),rhr:num('rhr'),sleep:num('sleep'),steps:num('steps'),hrv:num('hrv'),
+  score:last.complete?last.total:'',tier:last.complete?tier(last.total):'incomplete',followed:fol,shared:!!last.shared,card:last.mode||'receipt'};
+ for(var k in extra)r[k]=extra[k];
+ try{fetch(SHEET_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(r)})}catch(e){}
+}
+var state={vo2alt:null};
+
+// Reference medians by sex and age band (see research notes)
+var VO2={m:[[29,48],[39,42.4],[49,37.8],[59,32.6],[69,28.2],[200,24.4]],f:[[29,37.6],[39,30.9],[49,27.7],[59,24.2],[69,20.9],[200,18.3]]};
+var GRIP={m:[[39,48],[49,46],[59,43],[69,38],[200,32]],f:[[39,29],[49,28],[59,26],[69,23],[200,19]]};
+function med(t,s,a){var r=t[s];for(var i=0;i<r.length;i++){if(a<=r[i][0])return r[i][1]}return r[r.length-1][1]}
+function ratioPts(r){if(r>=1.25)return 20;if(r>=1.1)return 17;if(r>=0.95)return 13;if(r>=0.8)return 8;return 4}
+
+function scoreAll(d){
+ var out=[];
+ // VO2
+ var v=null,vl='';
+ if(d.vo2){v=ratioPts(d.vo2/med(VO2,d.sex,d.age));vl=d.vo2+' ml/kg/min'}
+ else if(d.vo2alt){v=[0,4,8,14,18][d.vo2alt];vl='Self-reported running'}
+ out.push({k:'VO₂ max',p:v,l:vl});
+ // Grip
+ var g=null;if(d.grip){g=ratioPts(d.grip/med(GRIP,d.sex,d.age))}
+ out.push({k:'Grip strength',p:g,l:d.grip?d.grip+' kg':'At the Forma table'});
+ // RHR
+ var h=null;if(d.rhr){h=d.rhr<60?20:d.rhr<70?16:d.rhr<80?11:d.rhr<90?6:2}
+ out.push({k:'Resting heart rate',p:h,l:d.rhr?d.rhr+' bpm':''});
+ // Sleep
+ var s=null;if(d.sleep){var x=d.sleep;s=(x>=7&&x<9)?20:(x>=6&&x<7)?13:(x>=9&&x<10)?12:(x>=5&&x<6)?6:3}
+ out.push({k:'Sleep',p:s,l:d.sleep?d.sleep+' h':''});
+ // Steps
+ var st=null;if(d.steps){var n=d.steps;
+  if(d.age<60){st=n>=10000?20:n>=8000?17:n>=6000?12:n>=4000?7:3}
+  else{st=n>=8000?20:n>=6000?17:n>=4000?10:4}}
+ out.push({k:'Daily steps',p:st,l:d.steps?Number(d.steps).toLocaleString('en')+' / day':''});
+ return out;
+}
+function tier(t){return t>=75?'Longevity Elite':t>=50?'Longevity Advanced':'Longevity Foundation'}
+
+document.querySelectorAll('.seg button').forEach(function(b){b.addEventListener('click',function(){
+ var sib=b.parentNode.querySelectorAll('button');var was=b.classList.contains('on');
+ sib.forEach(function(x){x.classList.remove('on')});
+ if(!was){b.classList.add('on');state.vo2alt=+b.dataset.v}else state.vo2alt=null});});
+
+var cur=0,LAST=7;
+function show(id){['s-quiz','s-result','s-host'].forEach(function(s){$(s).classList.toggle('hidden',s!==id)});window.scrollTo(0,0)}
+function num(id){var v=parseFloat($(id).value);return isNaN(v)?null:v}
+function go(i){cur=i;document.querySelectorAll('.step').forEach(function(el){el.classList.toggle('on',+el.dataset.step===i)});
+ $('prog').textContent=i===0?'':String(i).padStart(2,'0')+' / 07';$('barFill').style.width=(i/LAST*100)+'%';
+ $('backBtn').style.visibility=i===0?'hidden':'visible';$('nextBtn').textContent=i===0?'Start':i===LAST?'See my score':i===6?'Next or skip':'Next';$('quizErr').textContent='';
+ var inp=document.querySelector('.step.on input');if(inp&&i>0)setTimeout(function(){try{inp.focus({preventScroll:true})}catch(e){}},250);window.scrollTo(0,0)}
+function fail(m){$('quizErr').textContent=m;return false}
+function valid(i){
+ if(i===0){var a=+$('age').value;if(!a||a<18||a>95||!$('sex').value)return fail('Add your age and sex to begin.');state.age=a;state.sex=$('sex').value;save()}
+ if(i===1&&num('vo2')===null&&!state.vo2alt)return fail('Add your VO₂ max, or pick the closest running option.');
+ if(i===2&&num('grip')===null)return fail('Enter your grip number, or tap "Not yet".');
+ if(i===3&&num('rhr')===null)return fail('Add your resting heart rate.');
+ if(i===4&&num('sleep')===null)return fail('Add your average sleep.');
+ if(i===5&&num('steps')===null)return fail('Add your daily steps.');
+ return true}
+function next(skip){if(!skip&&!valid(cur))return;if(cur===LAST){finish();return}go(cur+1)}
+function back(){if(cur>0)go(cur-1)}
+document.addEventListener('keydown',function(e){if(e.key==='Enter'&&!$('s-quiz').classList.contains('hidden')){e.preventDefault();next()}});
+var last=null;
+function finish(){
+ var d={age:state.age,sex:state.sex,vo2:num('vo2'),vo2alt:state.vo2alt,grip:num('grip'),rhr:num('rhr'),sleep:num('sleep'),steps:num('steps')};
+ var parts=scoreAll(d),tot=0;parts.forEach(function(p){tot+=p.p||0});
+ var complete=d.grip!==null;
+ last={d:d,parts:parts,total:tot,complete:complete,name:$('name').value.trim(),photo:null};
+ $('rScore').textContent=tot;$('rTier').textContent=complete?tier(tot):'Score in progress';
+ $('rOf').textContent=complete?'/ 100':'/ 80 so far';
+ $('gripNote').classList.toggle('hidden',complete);
+ $('shareBlock').classList.toggle('hidden',!complete);
+ $('rTable').innerHTML='';
+ parts.forEach(function(p){var tr=document.createElement('tr');
+  var a=document.createElement('td');var b=document.createElement('div');b.textContent=p.k;var c=document.createElement('div');c.className='tag';c.textContent=p.l;a.appendChild(b);a.appendChild(c);
+  var z=document.createElement('td');z.className='pts';z.textContent=p.p===null?'pending':p.p+' / 20';
+  tr.appendChild(a);tr.appendChild(z);$('rTable').appendChild(tr)});
+ show('s-result');
+ try{if(localStorage.getItem('forma_followed'))unlockShare()}catch(e){}
+ if(complete)drawCard();
+ saveRow({});
+}
+function addGrip(){var g=parseFloat($('gripLate').value);if(isNaN(g))return;$('grip').value=g;finish()}
+function restart(){try{localStorage.removeItem('forma_quiz')}catch(e){}location.reload()}
+function save(){try{localStorage.setItem('forma_quiz',JSON.stringify({age:state.age,sex:state.sex}))}catch(e){}}
+
+// Story card
+var logoImg=new Image();logoImg.src=LOGO;
+function spaced(ctx,txt,x,y,sp,align){var w=0,chars=txt.split('');chars.forEach(function(c){w+=ctx.measureText(c).width+sp});w-=sp;
+ var sx=align==='center'?x-w/2:x;chars.forEach(function(c){ctx.fillText(c,sx,y);sx+=ctx.measureText(c).width+sp})}
+function fontsReady(){return Promise.all([document.fonts.load('italic 700 400px Cormorant'),document.fonts.load('italic 300 80px Cormorant'),document.fonts.load('400 30px "DM Mono"'),
+ new Promise(function(r){if(logoImg.complete)r();else logoImg.onload=r})])}
+var FOREST='#0F1A12',BONE='#F6F1E9',AMBER='#C9A24B',STEEL='#8A9E90',GREEN='#24442D';
+var darkLogo=null;
+function getDarkLogo(){if(darkLogo)return darkLogo;var c=document.createElement('canvas');c.width=logoImg.width;c.height=logoImg.height;var x=c.getContext('2d');
+ x.drawImage(logoImg,0,0);x.globalCompositeOperation='source-in';x.fillStyle=FOREST;x.fillRect(0,0,c.width,c.height);darkLogo=c;return c}
+function bestMarker(){return last.parts.slice().sort(function(a,b){return (b.p||0)-(a.p||0)})[0]}
+function finishCard(c){c.toBlob(function(b){last.blob=b;$('cardImg').src=URL.createObjectURL(b)},'image/jpeg',0.92)}
+function zig(x,x0,y0,w,h,t){var n=Math.round(w/t);x.beginPath();x.moveTo(x0,y0+t/2);
+ for(var i=0;i<n;i++){x.lineTo(x0+(i+.5)*w/n,y0);x.lineTo(x0+(i+1)*w/n,y0+t/2)}
+ x.lineTo(x0+w,y0+h-t/2);
+ for(var j=n;j>0;j--){x.lineTo(x0+(j-.5)*w/n,y0+h);x.lineTo(x0+(j-1)*w/n,y0+h-t/2)}
+ x.closePath();x.fill()}
+function dash(x,x0,x1,y){x.save();x.strokeStyle='rgba(15,26,18,.45)';x.lineWidth=2;x.setLineDash([10,8]);x.beginPath();x.moveTo(x0,y);x.lineTo(x1,y);x.stroke();x.restore()}
+function barcode(x,cx,y,w,h,seed){var s=0;for(var i=0;i<seed.length;i++)s=(s*31+seed.charCodeAt(i))>>>0;var px=cx-w/2;x.fillStyle=FOREST;
+ while(px<cx+w/2-6){s=(Math.imul(s,1103515245)+12345)>>>0;var bw=2+(s%4)*2;x.fillRect(px,y,bw,h);px+=bw+2+((s>>>8)%3)*3}}
+function receipt(x,W,full){
+ var H=full?1180:570,pad=full?64:40;
+ x.fillStyle=BONE;zig(x,0,0,W,H,full?26:20);
+ var L=getDarkLogo(),lw=full?230:140,lh=lw*L.height/L.width;x.drawImage(L,(W-lw)/2,full?60:40,lw,lh);
+ var y=(full?60:40)+lh+(full?44:30);
+ x.fillStyle=FOREST;x.font=(full?'400 26px':'400 18px')+' "DM Mono"';spaced(x,'LONGEVITY RECEIPT',W/2,y,full?6:4,'center');
+ y+=full?38:26;x.fillStyle=GREEN;x.font=(full?'400 21px':'400 15px')+' "DM Mono"';spaced(x,'ZÜRICH · 25.10.2026',W/2,y,4,'center');
+ y+=full?36:24;dash(x,pad,W-pad,y);y+=full?64:30;
+ if(full){last.parts.forEach(function(p){
+  x.fillStyle=FOREST;x.font='400 27px "DM Mono"';x.textAlign='left';x.fillText(p.k.toUpperCase(),pad,y);
+  x.textAlign='right';x.fillText((p.p===null?'--':p.p)+' / 20',W-pad,y);x.textAlign='left';
+  var tw=x.measureText(p.k.toUpperCase()).width;x.fillStyle='rgba(15,26,18,.35)';for(var d=pad+tw+18;d<W-pad-150;d+=14)x.fillRect(d,y-6,4,4);
+  y+=62});y-=10;dash(x,pad,W-pad,y);y+=40}
+ x.fillStyle=FOREST;x.font=(full?'400 30px':'400 20px')+' "DM Mono"';x.fillText('TOTAL',pad,y+(full?110:80));
+ x.textAlign='right';x.font=(full?'italic 700 230px':'italic 700 170px')+' Cormorant';x.fillText(String(last.total),W-pad,y+(full?170:130));x.textAlign='left';
+ y+=full?225:190;x.fillStyle=GREEN;x.font=(full?'italic 300 68px':'italic 300 46px')+' Cormorant';x.textAlign='center';x.fillText(tier(last.total),W/2,y);x.textAlign='left';
+ if(full){y+=56;barcode(x,W/2,y,W-2*pad-120,90,String(last.total)+tier(last.total)+RID);y+=140;
+  x.fillStyle=FOREST;x.font='400 20px "DM Mono"';spaced(x,'WHAT GETS MEASURED, GETS IMPROVED',W/2,y,4,'center')}
+ else{y+=64;barcode(x,W/2,y,W-2*pad-40,56,String(last.total)+RID)}
+ return H}
+function drawCardOld(){fontsReady().then(function(){last.mode='receipt';
+ var c=$('card'),x=c.getContext('2d');x.fillStyle=FOREST;x.fillRect(0,0,1080,1920);
+ x.fillStyle=AMBER;x.font='400 28px "DM Mono"';spaced(x,'MY LONGEVITY SCORE',540,230,9,'center');
+ x.save();x.translate(540,1010);x.rotate(-0.035);x.translate(-410,-590);receipt(x,820,true);x.restore();
+ x.fillStyle=STEEL;x.font='400 22px "DM Mono"';spaced(x,'STRONGEST MARKER · '+bestMarker().k.toUpperCase(),540,1800,5,'center');
+ finishCard(c)})}
+function drawPhotoCardOld(img){fontsReady().then(function(){last.mode='photo';
+ var c=$('card'),x=c.getContext('2d');x.fillStyle=FOREST;x.fillRect(0,0,1080,1920);
+ x.fillStyle=AMBER;x.font='400 26px "DM Mono"';spaced(x,'MY LONGEVITY SCORE',540,190,9,'center');
+ x.save();x.translate(500,780);x.rotate(-0.05);
+ var PW=780,PH=940;x.fillStyle=BONE;x.fillRect(-PW/2,-PH/2,PW,PH);
+ var s=720,r=Math.max(s/img.width,s/img.height),w=img.width*r,h=img.height*r;
+ x.save();x.beginPath();x.rect(-s/2,-PH/2+30,s,s);x.clip();x.drawImage(img,-w/2,-PH/2+30+(s-h)/2,w,h);x.restore();
+ x.fillStyle=FOREST;x.font='italic 700 120px Cormorant';x.fillText(String(last.total),-PW/2+44,PH/2-54);
+ var sw=x.measureText(String(last.total)).width;
+ x.font='400 22px "DM Mono"';spaced(x,'/ 100',-PW/2+44+sw+16,PH/2-58,5,'left');
+ x.fillStyle=GREEN;x.font='italic 300 44px Cormorant';x.textAlign='right';x.fillText(tier(last.total),PW/2-40,PH/2-60);x.textAlign='left';
+ x.restore();
+ x.save();x.translate(815,1585);x.rotate(0.07);x.translate(-210,-285);receipt(x,420,false);x.restore();
+ var lw=200,lh=lw*logoImg.height/logoImg.width;x.drawImage(logoImg,90,1810-lh,lw,lh);
+ finishCard(c)})}
+function vals(){var d=last.d,P=last.parts;return [
+ {k:'VO₂ MAX',v:d.vo2?String(d.vo2):String(P[0].p),u:d.vo2?'':'/20'},
+ {k:'GRIP',v:d.grip!==null?String(d.grip):'--',u:'KG'},
+ {k:'RESTING HR',v:String(d.rhr),u:'BPM'},
+ {k:'SLEEP',v:String(d.sleep),u:'H'},
+ {k:'STEPS',v:Number(d.steps).toLocaleString('en'),u:''}]}
+function radar(x,cx,cy,R,col,lab){var n=5,pts=last.parts;x.save();
+ x.strokeStyle='rgba(246,241,233,.18)';x.lineWidth=2;
+ [0.5,1].forEach(function(k){x.beginPath();for(var i=0;i<=n;i++){var a=-Math.PI/2+i*2*Math.PI/n;x[i?'lineTo':'moveTo'](cx+Math.cos(a)*R*k,cy+Math.sin(a)*R*k)}x.stroke()});
+ x.beginPath();for(var i=0;i<=n;i++){var j=i%n,f=Math.max(.08,(pts[j].p||0)/20),a=-Math.PI/2+j*2*Math.PI/n;x[i?'lineTo':'moveTo'](cx+Math.cos(a)*R*f,cy+Math.sin(a)*R*f)}
+ x.fillStyle='rgba(201,162,75,.22)';x.fill();x.strokeStyle=col;x.lineWidth=6;x.lineJoin='round';x.stroke();
+ for(var i=0;i<n;i++){var f=Math.max(.08,(pts[i].p||0)/20),a=-Math.PI/2+i*2*Math.PI/n;x.fillStyle=col;x.beginPath();x.arc(cx+Math.cos(a)*R*f,cy+Math.sin(a)*R*f,9,0,7);x.fill()}
+ if(lab){var L=['CARDIO','STRENGTH','HEART','SLEEP','MOVE'];x.fillStyle='rgba(246,241,233,.55)';x.font='400 20px "DM Mono"';x.textAlign='center';
+  for(var i=0;i<n;i++){var a=-Math.PI/2+i*2*Math.PI/n;x.fillText(L[i],cx+Math.cos(a)*(R+44),cy+Math.sin(a)*(R+44)+8)}x.textAlign='left'}
+ x.restore()}
+function stat(x,px,py,s,align,big){x.textAlign=align;
+ x.fillStyle='rgba(246,241,233,.7)';x.font='400 '+(big?26:24)+'px "DM Mono"';x.fillText(s.k,px,py);
+ x.fillStyle=BONE;x.font='italic 700 '+(big?104:92)+'px Cormorant';var vy=py+(big?104:94);
+ if(align==='left'){x.fillText(s.v,px,vy);var w=x.measureText(s.v).width;x.fillStyle=AMBER;x.font='400 26px "DM Mono"';x.fillText(s.u,px+w+12,vy)}
+ else{var w2=0;x.font='400 26px "DM Mono"';w2=s.u?x.measureText(s.u).width+12:0;x.font='italic 700 '+(big?104:92)+'px Cormorant';var tw=x.measureText(s.v).width;
+  var sx=px-(tw+w2)/2;x.textAlign='left';x.fillText(s.v,sx,vy);x.fillStyle=AMBER;x.font='400 26px "DM Mono"';x.fillText(s.u,sx+tw+12,vy)}
+ x.textAlign='left'}
+function drawCard(){fontsReady().then(function(){last.mode='stats';
+ var c=$('card'),x=c.getContext('2d');x.fillStyle=FOREST;x.fillRect(0,0,1080,1920);
+ x.fillStyle='rgba(246,241,233,.7)';x.font='400 28px "DM Mono"';spaced(x,'LONGEVITY SCORE',90,330,7,'left');
+ x.fillStyle=BONE;x.font='italic 700 330px Cormorant';x.fillText(String(last.total),76,620);
+ var w=x.measureText(String(last.total)).width;x.fillStyle=AMBER;x.font='400 34px "DM Mono"';x.fillText('/100',76+w+16,620);
+ x.fillStyle=AMBER;x.font='italic 300 76px Cormorant';x.fillText(tier(last.total),90,730);
+ radar(x,770,480,140,AMBER,true);
+ x.fillStyle='rgba(246,241,233,.14)';x.fillRect(90,810,900,2);
+ var V=vals();[[0,90,880],[1,560,880],[2,90,1110],[3,560,1110],[4,90,1340]].forEach(function(q){stat(x,q[1],q[2],V[q[0]],'left',true)});
+ stat(x,560,1340,{k:'STRONGEST',v:bestMarker().k.replace('Resting heart rate','Heart').replace('Daily steps','Steps').replace('Grip strength','Grip'),u:''},'left',true);
+ x.fillStyle='rgba(246,241,233,.14)';x.fillRect(90,1560,900,2);
+ var lw=190,lh=lw*logoImg.height/logoImg.width;x.drawImage(logoImg,90,1600,lw,lh);
+ x.fillStyle=STEEL;x.font='400 22px "DM Mono"';x.textAlign='right';x.fillText('ZÜRICH · 25.10.2026',990,1600+lh-8);x.textAlign='left';
+ finishCard(c)})}
+function drawPhotoCard(img){fontsReady().then(function(){last.mode='photo';
+ var c=$('card'),x=c.getContext('2d');
+ var r=Math.max(1080/img.width,1920/img.height),w=img.width*r,h=img.height*r;x.drawImage(img,(1080-w)/2,(1920-h)/2,w,h);
+ x.fillStyle='rgba(15,26,18,.38)';x.fillRect(0,0,1080,1920);
+ x.textAlign='center';x.fillStyle=BONE;x.font='400 28px "DM Mono"';spaced(x,'LONGEVITY SCORE',540,360,7,'center');
+ x.font='italic 700 300px Cormorant';x.textAlign='center';x.fillText(String(last.total),540,640);
+ x.fillStyle=AMBER;x.font='italic 300 70px Cormorant';x.fillText(tier(last.total),540,740);x.textAlign='left';
+ var V=vals();stat(x,220,860,V[0],'center');stat(x,540,860,V[1],'center');stat(x,860,860,V[2],'center');
+ stat(x,380,1060,V[3],'center');stat(x,700,1060,V[4],'center');
+ radar(x,540,1390,130,AMBER,false);
+ var lw=200,lh=lw*logoImg.height/logoImg.width;x.drawImage(logoImg,90,1650,lw,lh);
+ x.fillStyle='rgba(246,241,233,.8)';x.font='400 22px "DM Mono"';x.textAlign='right';x.fillText('ZÜRICH · 25.10.2026',990,1650+lh-8);x.textAlign='left';
+ finishCard(c)})}
+function setMode(m){$('modeCard').classList.toggle('on',m==='card');$('modePhoto').classList.toggle('on',m==='photo');if(m==='card')drawCard()}
+function takePhoto(){$('photoIn').value='';$('photoIn').click()}
+function gotPhoto(e){var f=e.target.files&&e.target.files[0];if(!f)return;var img=new Image();
+ img.onload=function(){setMode('photo');$('modeCard').classList.remove('on');$('modePhoto').classList.add('on');drawPhotoCard(img)};
+ img.src=URL.createObjectURL(f)}
+function followed(){try{localStorage.setItem('forma_followed','1')}catch(e){}saveRow({followed:true});setTimeout(unlockShare,800)}
+function unlockShare(){var b=$('shareBtn');b.disabled=false;b.style.opacity=1;$('followBtn').textContent='Following @forma.longevity ✓';$('shareHint').textContent='Pick Instagram, then Story. Tag @forma.longevity so your score counts for the prize.'}
+var INAPP=/Instagram|FBAN|FBAV|WhatsApp|Line\/|; wv\)/i.test(navigator.userAgent);
+async function shareCard(){
+ if(!last||!last.blob)return;
+ last.shared=true;saveRow({shared:true});
+ var f=new File([last.blob],'forma-longevity-score.jpg',{type:'image/jpeg'});
+ if(!INAPP&&navigator.share&&navigator.canShare){
+  try{ if(navigator.canShare({files:[f]})){await navigator.share({files:[f]});return} }
+  catch(e){ if(e&&e.name==='AbortError')return }
+ }
+ openSheet();
+}
+function openSheet(){$('sheetImg').src=$('cardImg').src;
+ if(INAPP)$('sheetTip').textContent='You opened this inside another app. Press and hold the card to save it, or open this page in Safari or Chrome to share straight to Instagram.';
+ $('saveSheet').classList.remove('hidden')}
+function closeSheet(){$('saveSheet').classList.add('hidden')}
+function openIg(){var t=Date.now();location.href='instagram://story-camera';
+ setTimeout(function(){if(!document.hidden&&Date.now()-t<2500)location.href='https://www.instagram.com/'},1400)}
+
+// Host mode
+var KEY='forma_board_251026';
+function load(){try{return JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){return []}}
+function store(l){try{localStorage.setItem(KEY,JSON.stringify(l))}catch(e){}}
+var remote=[];
+function pullSheet(){if(!SHEET_URL||SHEET_URL.indexOf('http')!==0)return;fetch(SHEET_URL).then(function(r){return r.json()}).then(function(d){remote=d.map(function(e,i){return {id:'r'+i,name:e.name,ig:e.ig,score:+e.score,shared:!!e.shared,remote:true}});renderHost()}).catch(function(){})}
+function renderHost(){
+ var l=load().concat(remote).filter(function(e){return !isNaN(e.score)}).sort(function(a,b){return b.score-a.score});
+ $('hostCount').textContent=l.length+' scores · prize goes to the top score that follows and shared';
+ var bd=$('board');bd.innerHTML='';var firstElig=l.findIndex(function(e){return e.shared});
+ l.slice(0,10).forEach(function(e,i){var d=document.createElement('div');d.className='e'+(i===0?' first':'');
+  var r=document.createElement('div');r.className='rk';r.textContent=String(i+1).padStart(2,'0');
+  var n=document.createElement('div');var nm=document.createElement('div');nm.className='nm';nm.textContent=e.name||'Guest';
+  var tg=document.createElement('div');tg.className='tag';tg.textContent=(e.ig?e.ig+' · ':'')+(i===firstElig?'prize leader':e.shared?'shared':'not shared yet');n.appendChild(nm);n.appendChild(tg);
+  var s=document.createElement('div');s.className='sc';s.textContent=e.score;d.appendChild(r);d.appendChild(n);d.appendChild(s);bd.appendChild(d)});
+ var t=$('hTable');t.innerHTML='';
+ l.forEach(function(e){var tr=document.createElement('tr');var a=document.createElement('td');a.textContent=(e.name||'Guest')+' · '+e.score;
+  var b=document.createElement('td');b.className='pts';var btn=document.createElement('button');btn.textContent=e.shared?'Shared ✓':'Mark shared';btn.style.minHeight='40px';btn.onclick=function(){toggle(e.id)};if(e.remote){btn.disabled=true;btn.textContent=e.shared?'Shared ✓':'Live';}b.appendChild(btn);
+  tr.appendChild(a);tr.appendChild(b);t.appendChild(tr)});
+}
+function addEntry(){var sc=parseInt($('hScore').value,10);if(isNaN(sc))return;
+ var l=load();l.push({id:Date.now(),name:$('hName').value.trim(),ig:$('hIg').value.trim(),email:$('hEmail').value.trim(),score:sc,grip:$('hGrip').value,shared:$('hShared').checked,at:new Date().toISOString()});
+ store(l);['hName','hIg','hEmail','hScore','hGrip'].forEach(function(i){$(i).value=''});$('hShared').checked=false;renderHost()}
+function toggle(id){var l=load();l.forEach(function(e){if(e.id===id)e.shared=!e.shared});store(l);renderHost()}
+function clearAll(){if(confirm('Delete every entry on this device?')){store([]);renderHost()}}
+function exportCsv(){var l=load();var rows=[['name','instagram','email','score','grip_kg','shared','time']].concat(l.map(function(e){return [e.name,e.ig,e.email,e.score,e.grip,e.shared?'yes':'no',e.at]}));
+ var csv=rows.map(function(r){return r.map(function(v){return '"'+String(v==null?'':v).replace(/"/g,'""')+'"'}).join(',')}).join('\n');
+ var blob=new Blob([csv],{type:'text/csv'});
+ var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='forma-event-scores.csv';document.body.appendChild(a);a.click();a.remove()}
+
+(function init(){
+ if(location.hash==='#host'){$('app').classList.add('hostwide');show('s-host');renderHost();pullSheet();setInterval(pullSheet,15000);return}
+ try{var s=JSON.parse(localStorage.getItem('forma_quiz')||'null');if(s){$('age').value=s.age||'';$('sex').value=s.sex||''}}catch(e){}
+ go(0);
+})();
+window.addEventListener('hashchange',function(){location.reload()});
+</script>
+</body>
+</html>
